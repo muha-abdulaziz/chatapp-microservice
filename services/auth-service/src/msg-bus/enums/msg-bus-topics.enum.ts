@@ -1,3 +1,3 @@
 export enum MsgBusTopics {
-  SEND_RESET_TOKEN = 'send_reset_token',
+  SEND_RESET_TOKEN = 'email_confirm_email',
 }
