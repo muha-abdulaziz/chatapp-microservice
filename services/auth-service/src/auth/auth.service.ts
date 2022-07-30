@@ -1,7 +1,10 @@
 import {Inject, Injectable, Logger} from '@nestjs/common';
+import {ConfigService} from '@nestjs/config';
 import {ClientProxy} from '@nestjs/microservices';
 import {Collection, Db} from 'mongodb';
 import {MsgBusTopics} from 'src/msg-bus/enums/msg-bus-topics.enum';
+import {IConfirmEmailEvent} from 'src/msg-bus/interfaces/confirm-email.interface';
+import {URL} from 'url';
 import {ISetToken} from './interfaces/set-token.interface';
 import {ResetTokenModel} from './models/reset-token.model';
 
@@ -14,6 +17,7 @@ export class AuthService {
     private db: Db,
     @Inject('MSG_BUS')
     private msgBus: ClientProxy,
+    private configService: ConfigService,
   ) {
     this.resetCollection = this.db.collection('resetTokens');
   }
@@ -54,9 +58,17 @@ export class AuthService {
       throw new Error();
     }
 
-    this.msgBus.emit(MsgBusTopics.SEND_RESET_TOKEN, {
-      resetToken: token,
-      email: data.email,
-    });
+    // [TODO] add method to generate emit payload
+    const url = new URL(
+      `/auth/reset-password?token=${token}`,
+      this.configService.get('APP_URI'),
+    );
+
+    this.msgBus
+      .emit(MsgBusTopics.SEND_RESET_TOKEN, {
+        urlRedirect: url.toString(),
+        email: data.email,
+      } as IConfirmEmailEvent)
+      .subscribe(e => console.log(e));
   }
 }
