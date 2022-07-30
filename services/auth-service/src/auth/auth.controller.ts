@@ -8,12 +8,16 @@ import {
   Query,
   Render,
 } from '@nestjs/common';
+import {AuthService} from './auth.service';
 import {ForgotPasswordDto} from './dto/forgot-password.dto';
 import {ResetPasswordDto} from './dto/reset-password.dto';
 import {SigninDto} from './dto/signin.dto';
+import {SignupDto} from './dto/signup.dto';
 
 @Controller()
 export class AuthController {
+  constructor(private authServie: AuthService) {}
+
   @Get('signin')
   @Render('signin')
   signinPage() {
@@ -34,7 +38,8 @@ export class AuthController {
 
   @Post('signup')
   @Render('check-your-email')
-  signup() {
+  async signup(@Body() signupDto: SignupDto) {
+    await this.authServie.setToken(signupDto);
     return;
   }
 
