@@ -1,5 +1,7 @@
 import {Inject, Injectable, Logger} from '@nestjs/common';
+import {ClientProxy} from '@nestjs/microservices';
 import {Collection, Db} from 'mongodb';
+import {MsgBusTopics} from 'src/msg-bus/enums/msg-bus-topics.enum';
 import {ISetToken} from './interfaces/set-token.interface';
 import {ResetTokenModel} from './models/reset-token.model';
 
@@ -10,6 +12,8 @@ export class AuthService {
   constructor(
     @Inject('MONGODB_CONNECTION')
     private db: Db,
+    @Inject('MSG_BUS')
+    private msgBus: ClientProxy,
   ) {
     this.resetCollection = this.db.collection('resetTokens');
   }
@@ -32,10 +36,11 @@ export class AuthService {
 
   async setToken(data: ISetToken) {
     const date = new Date().toISOString();
+    const token = this.genToken();
 
     const resetToken = new ResetTokenModel({
       email: data.email,
-      token: this.genToken(),
+      token,
       expiry: this.genExpiryDate(),
       createdAt: date,
       updatedAt: date,
@@ -48,5 +53,10 @@ export class AuthService {
 
       throw new Error();
     }
+
+    this.msgBus.emit(MsgBusTopics.SEND_RESET_TOKEN, {
+      resetToken: token,
+      email: data.email,
+    });
   }
 }
