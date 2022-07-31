@@ -17,10 +17,10 @@ async function bootstrap() {
   app.connectMicroservice({
     transport: Transport.KAFKA,
     options: {
-      brokers: [configService.get('KAFKA_BROKER_URI') ?? 'localhost:9092'],
+      brokers: [configService.get('AUTH_KAFKA_BROKER_URI') ?? 'localhost:9092'],
     },
   });
 
-  await app.listen(configService.get('PORT') ?? 3000);
+  await app.listen(configService.get('AUTH_PORT') ?? 3000);
 }
 bootstrap();

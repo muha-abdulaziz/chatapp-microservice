@@ -14,8 +14,8 @@ import {ClientProxyFactory, Transport} from '@nestjs/microservices';
           transport: Transport.KAFKA,
           options: {
             client: {
-              clientId: configService.get('KAFKA_CLIENT_ID'),
-              brokers: [configService.get('KAFKA_BROKER_URI')],
+              clientId: configService.get('AUTH_KAFKA_CLIENT_ID'),
+              brokers: [configService.get('AUTH_KAFKA_BROKER_URI')],
             },
           },
         });

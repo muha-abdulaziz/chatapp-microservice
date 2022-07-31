@@ -9,10 +9,10 @@ async function bootstrap() {
       transport: Transport.KAFKA,
       options: {
         client: {
-          brokers: [process.env['KAFKA_BROKER_URI']],
-          clientId: process.env['KAFKA_CLIENT_ID'],
+          brokers: [process.env['EMAIL_KAFKA_BROKER_URI']],
+          clientId: process.env['EMAIL_KAFKA_CLIENT_ID'],
         },
-        consumer: { groupId: process.env['KAFKA_GROUP_ID'] },
+        consumer: { groupId: process.env['EMAIL_KAFKA_GROUP_ID'] },
       },
     },
   );

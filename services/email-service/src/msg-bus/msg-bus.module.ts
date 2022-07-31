@@ -14,10 +14,10 @@ import { ClientProxyFactory, Transport } from '@nestjs/microservices';
           transport: Transport.KAFKA,
           options: {
             client: {
-              clientId: configService.get('KAFKA_CLIENT_ID'),
-              brokers: [configService.get('KAFKA_BROKER_URI')],
+              clientId: configService.get('EMAIL_KAFKA_CLIENT_ID'),
+              brokers: [configService.get('EMAIL_KAFKA_BROKER_URI')],
             },
-            consumer: { groupId: configService.get('KAFKA_GROUP_ID') },
+            consumer: { groupId: configService.get('EMAIL_KAFKA_GROUP_ID') },
           },
         });
       },

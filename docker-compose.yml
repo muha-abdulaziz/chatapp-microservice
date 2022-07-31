@@ -1,0 +1,71 @@
+version: "3"
+services:
+  auth-service:
+    build:
+      context: ./services/auth-service
+      target: production
+    restart: always
+    ports:
+      - "${AUTH_PORT:-3000}:3000"
+    environment:
+      - APP_URI
+      - AUTH_MONGODB_URI
+      - AUTH_MONGODB_DB_NAME
+      - AUTH_KAFKA_BROKER_URI
+      - AUTH_KAFKA_CLIENT_ID
+      - AUTH_KAFKA_GROUP_ID
+    depends_on:
+      - mongo
+      - kafka
+
+  email-service:
+    build:
+      context: ./services/email-service
+      target: production
+    restart: always
+    environment:
+      - EMAIL_PROVIDER_URI
+      - EMAIL_PROVIDER_PORT
+      - EMAIL_ACCOUNT_USERNAME
+      - EMAIL_ACCOUNT_PASS
+      - EMAIL_KAFKA_BROKER_URI
+      - EMAIL_KAFKA_CLIENT_ID
+      - EMAIL_KAFKA_GROUP_ID
+    depends_on:
+      - kafka
+
+  mongo:
+    image: mongo:4.4
+    ports:
+      - "27017:27017"
+    volumes:
+      - chatapp-mongo-data:/data/db
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - chatapp-redis-data:/data
+
+  zookeeper:
+    image: zookeeper
+    hostname: zookeeper
+    ports:
+      - 2181:2181
+
+  kafka:
+    image: confluentinc/cp-kafka
+    hostname: localhost
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: <YOUR_IP_ADDRESS>
+      ZOOKEEPER_IP: <YOUR_IP_ADDRESS>
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    depends_on:
+      - zookeeper
+
+volumes:
+  chatapp-redis-data:
+  chatapp-mongo-data:

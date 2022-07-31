@@ -13,10 +13,10 @@ import {Db, MongoClient} from 'mongodb';
           // [TODO] get connection string from env
           // const client = await MongoClient.connect('mongodb://127.0.0.1');
           const client = await MongoClient.connect(
-            configService.get('MONGODB_URI'),
+            configService.get('AUTH_MONGODB_URI'),
           );
 
-          return client.db(configService.get('MONGODB_DB_NAME'));
+          return client.db(configService.get('AUTH_MONGODB_DB_NAME'));
         } catch (e) {
           throw e;
         }
