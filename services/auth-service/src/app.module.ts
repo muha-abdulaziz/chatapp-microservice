@@ -3,6 +3,7 @@ import {ConfigModule} from '@nestjs/config';
 import {AuthModule} from './auth/auth.module';
 import {MongodbModule} from './mongodb/mongodb.module';
 import {MsgBusModule} from './msg-bus/msg-bus.module';
+import {UserModule} from './user/user.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import {MsgBusModule} from './msg-bus/msg-bus.module';
       envFilePath:
         process.env.NODE_ENV === 'production' ? '.env' : '.env.development',
     }),
+    UserModule,
     MsgBusModule,
   ],
   providers: [],
