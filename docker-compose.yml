@@ -34,6 +34,25 @@ services:
     depends_on:
       - kafka
 
+  chat-service:
+    build:
+      context: ./services/chat-service
+      target: production
+    restart: always
+    ports:
+      - "${CHAT_PORT:-3001}:3001"
+    environment:
+      - APP_URI
+      - CHAT_MONGODB_URI
+      - CHAT_MONGODB_DB_NAME
+      - CHAT_KAFKA_BROKER_URI
+      - CHAT_KAFKA_CLIENT_ID
+      - CHAT_KAFKA_GROUP_ID
+    depends_on:
+      - mongo
+      - kafka
+      - redis
+
   mongo:
     image: mongo:4.4
     ports:
