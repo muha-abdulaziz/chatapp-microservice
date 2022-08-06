@@ -13,14 +13,20 @@ async function bootstrap() {
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
   app.setViewEngine('hbs');
 
-  app.connectMicroservice({
-    transport: Transport.KAFKA,
-    options: {
-      brokers: [configService.get('CHAT_KAFKA_BROKER_URI') ?? 'localhost:9092'],
-      consumer: {groupId: configService.get('CHAT_KAFKA_GROUP_ID')},
+  app.connectMicroservice(
+    {
+      transport: Transport.KAFKA,
+      options: {
+        brokers: [
+          configService.get('CHAT_KAFKA_BROKER_URI') ?? 'localhost:9092',
+        ],
+        consumer: {groupId: configService.get('CHAT_KAFKA_GROUP_ID')},
+      },
     },
-  });
+    {inheritAppConfig: true},
+  );
 
+  await app.startAllMicroservices();
   await app.listen(configService.get('CHAT_PORT') ?? 3001);
 }
 bootstrap();

@@ -14,13 +14,19 @@ async function bootstrap() {
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
   app.setViewEngine('ejs');
 
-  app.connectMicroservice({
-    transport: Transport.KAFKA,
-    options: {
-      brokers: [configService.get('AUTH_KAFKA_BROKER_URI') ?? 'localhost:9092'],
+  app.connectMicroservice(
+    {
+      transport: Transport.KAFKA,
+      options: {
+        brokers: [
+          configService.get('AUTH_KAFKA_BROKER_URI') ?? 'localhost:9092',
+        ],
+      },
     },
-  });
+    {inheritAppConfig: true},
+  );
 
+  await app.startAllMicroservices();
   await app.listen(configService.get('AUTH_PORT') ?? 3000);
 }
 bootstrap();
