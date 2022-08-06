@@ -20,5 +20,43 @@
     <form id="form" action="">
       <input id="input" autocomplete="off" /><button>Send</button>
     </form>
+
+    <!-- Import socket.io module -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      function addMeg(msg) {
+        if (Object.prototype.toString.call(msg) !== '[object Object]') {
+          throw new TypeError('Incoming message is not in correct format')
+        }
+
+        var item = document.createElement('li');
+        item.textContent = msg.msgBody;
+        messages.appendChild(item);
+        window.scrollTo(0, document.body.scrollHeight);
+      }
+    </script>
+
+    <script>
+      var socket = io();
+
+      var messages = document.getElementById('messages');
+      var form = document.getElementById('form');
+      var input = document.getElementById('input');
+
+      // send a message
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (input.value) {
+          socket.emit('message',
+            input.value,
+            (res) => {addMeg(res)
+          });
+          input.value = '';
+        }
+      });
+
+      // receive a message
+      socket.on('message', (msg) => {addMeg(msg)});
+    </script>
   </body>
 </html>
