@@ -19,7 +19,7 @@ export class UserService {
     await this.userCollection.insertOne(user);
   }
 
-  async getUserByEmail(email: string): Promise<User> {
+  async getUserByEmail(email: string): Promise<User | null> {
     this.logger.debug('Getting a user by email...');
     return this.userCollection.findOne<User>({email});
   }
