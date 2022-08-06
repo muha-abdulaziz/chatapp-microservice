@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Post,
   Query,
+  Redirect,
   Render,
 } from '@nestjs/common';
 import {AuthService} from './auth.service';
@@ -16,7 +17,7 @@ import {SignupDto} from './dto/signup.dto';
 
 @Controller()
 export class AuthController {
-  constructor(private authServie: AuthService) {}
+  constructor(private authService: AuthService) {}
 
   @Get('signin')
   @Render('signin')
@@ -39,7 +40,7 @@ export class AuthController {
   @Post('signup')
   @Render('check-your-email')
   async signup(@Body() signupDto: SignupDto) {
-    await this.authServie.setToken(signupDto);
+    await this.authService.setToken(signupDto);
     return;
   }
 
@@ -52,9 +53,10 @@ export class AuthController {
   }
 
   @Post('reset-password')
-  @Render('check-your-email')
-  resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
-    return resetPasswordDto;
+  @Redirect('signin')
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    await this.authService.resetPassword(resetPasswordDto);
+    return;
   }
 
   @Get('forgot-password')

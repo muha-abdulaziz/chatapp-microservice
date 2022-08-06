@@ -8,6 +8,7 @@ import {
 import {ConfigService} from '@nestjs/config';
 import {ClientProxy} from '@nestjs/microservices';
 import {Collection, Db} from 'mongodb';
+import {nanoid} from 'nanoid/async';
 import {MsgBusTopics} from 'src/msg-bus/enums/msg-bus-topics.enum';
 import {IConfirmEmailEvent} from 'src/msg-bus/interfaces/confirm-email.interface';
 import {User} from 'src/user/models/user.model';
@@ -39,9 +40,8 @@ export class AuthService {
    *  It generate a unique and secure string
    * @returns {string}
    */
-  genToken(): string {
-    // [TODO] generate token properly
-    return 'asklfmds';
+  async genResetToken(): Promise<string> {
+    return nanoid();
   }
 
   genExpiryDate(minutes = 60): string {
@@ -58,7 +58,7 @@ export class AuthService {
    */
   async setToken(data: ISetToken) {
     const date = new Date().toISOString();
-    const token = this.genToken();
+    const token = await this.genResetToken();
 
     const resetToken = new ResetTokenModel({
       email: data.email,
@@ -87,13 +87,13 @@ export class AuthService {
         urlRedirect: url.toString(),
         email: data.email,
       } as IConfirmEmailEvent)
-      .subscribe(e => console.log(e));
+      .subscribe({error: e => this.logger.error(e)});
   }
 
   isResetTokenValid(sentToken: string, actualToken: ResetTokenModel | null) {
     if (!actualToken) return false;
 
-    const expired = actualToken.expiry >= new Date().toISOString();
+    const expired = actualToken.expiry <= new Date().toISOString();
 
     if (expired) return false;
 
@@ -115,7 +115,7 @@ export class AuthService {
       existingToken.email,
     );
 
-    if (existingToken) {
+    if (existingUser) {
       await this.userService.updateUser(existingUser._id, {
         password: hashedPassword,
       });
@@ -123,15 +123,26 @@ export class AuthService {
       const date = new Date().toISOString();
 
       const createdUser = new User({
-        _id: uuid,
+        _id: uuid.v4(),
         email: existingToken.email,
         password: hashedPassword,
         createdAt: date,
         updatedAt: date,
       });
       await this.userService.addNewUser(createdUser);
+      delete createdUser.password;
 
-      this.msgBus.emit(MsgBusTopics.USER_CREATED, createdUser);
+      this.msgBus
+        .emit(MsgBusTopics.USER_CREATED, JSON.stringify(createdUser))
+        .subscribe({
+          next: v => {
+            this.logger.log('Sent a user created event');
+            this.logger.debug(JSON.stringify(v));
+          },
+          error: e => {
+            this.logger.error('create user event not has an error', e);
+          },
+        });
     }
     return;
   }
