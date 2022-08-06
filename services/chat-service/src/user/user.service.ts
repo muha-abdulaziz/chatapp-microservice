@@ -5,7 +5,7 @@ import {User} from './models/user.model';
 @Injectable()
 export class UserService {
   readonly logger = new Logger(UserService.name);
-  userCollection: Collection;
+  private userCollection: Collection;
   constructor(
     @Inject('MONGODB_CONNECTION')
     private db: Db,
@@ -14,17 +14,22 @@ export class UserService {
     this.userCollection = this.db.collection('users');
   }
 
-  async addNewUser(user: User): Promise<void> {
+  async insertOne(user: User): Promise<void> {
     this.logger.debug('Creating a user...');
     await this.userCollection.insertOne(user);
   }
 
-  async getUserByEmail(email: string): Promise<User> {
+  async findById(id: string): Promise<User | null> {
+    this.logger.debug('Getting a user by email...');
+    return this.userCollection.findOne<User>({_id: id});
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
     this.logger.debug('Getting a user by email...');
     return this.userCollection.findOne<User>({email});
   }
 
-  async updateUser(
+  async updateOne(
     id: string | ObjectId,
     user: Partial<Omit<User, '_id'>>,
   ): Promise<void> {
