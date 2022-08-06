@@ -8,10 +8,10 @@ export class UserService {
   private userCollection: Collection;
   constructor(
     @Inject('MONGODB_CONNECTION')
-    private db: Db,
+    private mongo: Db,
   ) {
     // [TODO] add collection names in enum
-    this.userCollection = this.db.collection('users');
+    this.userCollection = this.mongo.collection('users');
   }
 
   async insertOne(user: User): Promise<void> {

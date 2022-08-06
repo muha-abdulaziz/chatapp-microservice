@@ -1,5 +1,6 @@
 import {Module} from '@nestjs/common';
 import {ConfigModule, ConfigService} from '@nestjs/config';
+import Redis from 'ioredis';
 import {Db, MongoClient} from 'mongodb';
 
 @Module({
@@ -22,7 +23,25 @@ import {Db, MongoClient} from 'mongodb';
         }
       },
     },
+    {
+      provide: 'REDIS_CONNECTION',
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService): Promise<Redis> => {
+        try {
+          // [TODO] get connection string from env
+          // const client = await MongoClient.connect('mongodb://127.0.0.1');
+          const client = new Redis(
+            (configService?.get('CHAT_REDIS_URI') ||
+              'redis://localhost:6379') as string,
+          );
+
+          return client;
+        } catch (e) {
+          throw e;
+        }
+      },
+    },
   ],
-  exports: ['MONGODB_CONNECTION'],
+  exports: ['MONGODB_CONNECTION', 'REDIS_CONNECTION'],
 })
-export class MongodbModule {}
+export class DbConnectionsModule {}

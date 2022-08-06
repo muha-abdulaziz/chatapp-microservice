@@ -1,10 +1,10 @@
 import {Module} from '@nestjs/common';
-import {MongodbModule} from 'src/mongodb/mongodb.module';
+import {DbConnectionsModule} from 'src/dbs/db-conections.module';
 import {UserController} from './user.controller';
 import {UserService} from './user.service';
 
 @Module({
-  imports: [MongodbModule],
+  imports: [DbConnectionsModule],
   providers: [UserService],
   controllers: [UserController],
 })
