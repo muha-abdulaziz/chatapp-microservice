@@ -9,6 +9,8 @@ import {
   Redirect,
   Render,
 } from '@nestjs/common';
+import {ConfigService} from '@nestjs/config';
+import {AccessTokenService} from './access-token.service';
 import {AuthService} from './auth.service';
 import {ForgotPasswordDto} from './dto/forgot-password.dto';
 import {ResetPasswordDto} from './dto/reset-password.dto';
@@ -17,7 +19,11 @@ import {SignupDto} from './dto/signup.dto';
 
 @Controller()
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+    private readonly accessTokenService: AccessTokenService,
+  ) {}
 
   @Get('signin')
   @Render('signin')
@@ -26,9 +32,16 @@ export class AuthController {
   }
 
   @Post('signin')
-  // @Render('check-your-email')
-  signin(@Body() signinDto: SigninDto) {
-    return signinDto;
+  @Redirect()
+  async signin(@Body() signinDto: SigninDto) {
+    const user = await this.authService.checkCredentials(signinDto);
+
+    if (!user) throw new HttpException('UnAuthorized', HttpStatus.UNAUTHORIZED);
+
+    const accessToken = await this.accessTokenService.generate(user);
+    return {
+      url: `${this.configService.get('CHAT_URI')}?access-token=${accessToken}`,
+    };
   }
 
   @Get('signup')

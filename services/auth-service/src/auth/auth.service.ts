@@ -16,6 +16,7 @@ import {UserService} from 'src/user/user.service';
 import {URL} from 'url';
 import * as uuid from 'uuid';
 import {ResetPasswordDto} from './dto/reset-password.dto';
+import {SigninDto} from './dto/signin.dto';
 import {ISetToken} from './interfaces/set-token.interface';
 import {ResetTokenModel} from './models/reset-token.model';
 import {PasswordService} from './password.service';
@@ -34,6 +35,19 @@ export class AuthService {
     private userService: UserService,
   ) {
     this.resetCollection = this.db.collection('resetTokens');
+  }
+
+  async checkCredentials(credentials: SigninDto): Promise<User | null> {
+    const user = await this.userService.getUserByEmail(credentials.email);
+    if (!user) return null;
+
+    const isValidPass = await this.passwordService.isSame(
+      credentials.password,
+      user.password,
+    );
+    if (isValidPass) return user;
+
+    return null;
   }
 
   /**
