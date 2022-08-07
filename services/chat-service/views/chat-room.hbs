@@ -16,13 +16,24 @@
     </style>
   </head>
   <body>
-    <ul id="messages"></ul>
+    <ul id="messages">
+      {{#each messages}}
+        <li id="{{this._id}}">{{this.sender.email}}: {{this.msgBody}}</li>
+      {{/each}}
+    </ul>
     <form id="form" action="">
       <input id="input" autocomplete="off" /><button>Send</button>
     </form>
 
     <!-- Import socket.io module -->
     <script src="/socket.io/socket.io.js"></script>
+    <script>
+      <!-- constants -->
+      const loginPage = "{{loginPage}}"
+      window.onload = () => {
+        checkAccessToken()
+      }
+      </script>
     <script>
       function addMeg(msg) {
         if (Object.prototype.toString.call(msg) !== '[object Object]') {
@@ -34,10 +45,27 @@
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
       }
+
+      function checkAccessToken() {
+        const params = new URLSearchParams(window.location.search);
+        const accessToken = params.get("access-token");
+        if (accessToken && accessToken.length) {
+          window.localStorage.setItem('t', accessToken);
+        }
+
+        const storedToken = window.localStorage.getItem('t');
+
+        if (!storedToken) {
+          // if no token redirect the user to the login page
+          window.location = loginPage;
+        }
+      }
     </script>
 
     <script>
-      var socket = io();
+      var socket = io({
+        auth: {token: window.localStorage.getItem('t')},
+      });
 
       var messages = document.getElementById('messages');
       var form = document.getElementById('form');
@@ -57,6 +85,13 @@
 
       // receive a message
       socket.on('message', (msg) => {addMeg(msg)});
+      socket.on("exception", (msg) => {
+        if (msg.message === "Forbidden resource") {
+          window.location = loginPage
+          return;
+        }
+        console.error(msg)
+      })
     </script>
   </body>
 </html>
