@@ -4,11 +4,40 @@ This is a chat app. it onsisting of 3 micro services
 
  [-] auth service - Responsible for regestring users, sign-in, generating access tokens ...etc
  [x] email service - Responsible for sending emails
- [ ] chat service - Handles the chat logic
+ [-] chat service - Handles the chat logic
 
- The email service almost done.
- The auth service missing sign-in process (checking user credentials and generating access token) and generate a reset password token properly
- The chat service not exist yet
+ The email service done.
+ The auth service almost done.
+ The chat service missing checking on auth token.
+
+## Run the app
+
+### Dependencies
+
+This system depends on the following
+
+  - Kafka the message queue (all services)
+  - Redis database (chat service)
+  - Mongo database (chat and auth services)
+
+However there is a docker-compose file, but it has an issue with kafka.
+
+To run kafka using docker run the following.
+
+```shell
+docker run --name zookeeper -p 2181:2181 zookeeper
+```
+
+```shell
+docker run -p 9092:9092 --name kafka  -e KAFKA_ZOOKEEPER_CONNECT=<Replace-with-your-host-name>:2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://<Replace-with-your-host-name>:9092 -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 confluentinc/cp-kafka
+```
+
+To run each service
+
+```shell
+cd services/<service-dir>
+npm run start:dev
+```
 
 ## A user scenario
 
@@ -52,11 +81,10 @@ This is a chat app. it onsisting of 3 micro services
  - I used "ejs" as a template system in the auth service, and because it has no support for blocks (as I found) I couldn't structre the pages properly.
  - The input validation happens as if the controller handles an API not an html template, so the validation error responses are in "json".
  - I used "handlebars" as template system in the email service becouse "ejs" has a bug with "@nestjs-modules/mailer" module that used to handle sending emails
- - In the sign-up the systems sends a fixed token, but it should send a secure generated string.
  - In the reset password controller, it doesn't checks the match of "password" and "confirm password"
  - The docker image need an enhancement to be production ready, as the image building happens on one stage, but it should be in 2 stages (in this case)
  - The docker-compose file not production ready, it just for development, as the used images of redis, mongodb, zookepper and kafka may be not the best choise in the production case (or using dockerized images setup for them)
- - The docker-compose may has issues
+ - The docker-compose may issues
 
 ## Creadits
 
