@@ -1,6 +1,5 @@
 import {Module} from '@nestjs/common';
 import {ConfigModule} from '@nestjs/config';
-import {AppController} from './app.controller';
 import {AppService} from './app.service';
 import {ChatRoomsModule} from './chat-rooms/chat-rooms.module';
 import {DbConnectionsModule} from './dbs/db-conections.module';
@@ -21,7 +20,6 @@ import {UserModule} from './user/user.module';
     MsgBusModule,
     ChatRoomsModule,
   ],
-  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}

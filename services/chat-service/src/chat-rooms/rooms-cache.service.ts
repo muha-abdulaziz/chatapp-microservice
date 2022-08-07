@@ -28,9 +28,22 @@ export class RoomsCacheService {
       .exec();
   }
 
-  async getMessages(room: string, count?: number) {
+  async getMessages(room: string, count?: number): Promise<MessageModel[]> {
     count = count ?? 10;
     // async getMessages(room: string, count?: number): Promise<MessageModel[]> {
-    return this.redis.xrange(this.getRoomKey(room), '-', '+', 'COUNT', count);
+    const messages = await this.redis.xrange(
+      this.getRoomKey(room),
+      '-',
+      '+',
+      'COUNT',
+      count,
+    );
+
+    if (!messages.length) return [];
+
+    /*
+     * messages => ['timestamp', ['msdId', 'msgBody']]
+     */
+    return messages.map(msg => JSON.parse(msg[1][1]));
   }
 }
